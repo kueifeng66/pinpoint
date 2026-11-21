@@ -1376,36 +1376,1004 @@ dialog::backdrop {
   }
 }
 
-@media (max-width: 960px) {
-  .hud-bottom-bar {
-    inset-inline-end: 12px;
-    inset-block-end: 12px;
-    padding: 5px 10px;
+/* ==========================================================================
+   Responsive Web Breakpoints (Mobile-First, referencing reference.jpg)
+   - Mobile  : < 640px        (Small screens / phones, including iPhone 13 Pro Max)
+   - Tablet  : 640px - 768px  (Tablets portrait)
+   - Laptop  : 768px - 1024px (Small laptops)
+   - Desktop : 1024px - 1280px (Laptops & desktops)
+   - Large   : >= 1280px      (Large screens HD/4K)
+   ========================================================================== */
+
+/* Base / Mobile (< 640px): Small screens (phones) */
+:root {
+  --panel-width: 100dvw;
+  --bookmark-width: 38px;
+  --safe-inline: max(42px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  --safe-top: max(74px, env(safe-area-inset-top, 0px));
+  --safe-bottom: max(74px, env(safe-area-inset-bottom, 0px));
+  --mobile-panel-height: clamp(190px, 32dvh, 245px);
+}
+
+.explorer-panel {
+  inset-block-start: auto;
+  inset-block-end: var(--safe-bottom);
+  inset-inline-start: var(--safe-inline);
+  inset-inline-end: var(--safe-inline);
+  inline-size: auto;
+  block-size: var(--mobile-panel-height);
+  border: 1px solid var(--border-medium);
+  border-radius: 18px;
+}
+
+.app-shell.is-collapsed .explorer-panel {
+  transform: translate3d(0, calc(100% + var(--safe-bottom) + 20px), 0);
+}
+
+.panel-header {
+  padding: 10px 12px;
+}
+
+.brand-mark {
+  inline-size: 30px;
+  block-size: 30px;
+  border-radius: 9px;
+}
+
+.brand-mark svg {
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.brand-text h1 {
+  font-size: 0.92rem;
+}
+
+.brand-sub {
+  font-size: 0.62rem;
+}
+
+.collapse-btn {
+  inline-size: 30px;
+  block-size: 30px;
+}
+
+.panel-scroll {
+  padding: 10px 12px 14px;
+  gap: 10px;
+}
+
+.welcome-card,
+.pinpoint-card {
+  padding: 12px;
+}
+
+.welcome-copy {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+}
+
+.pinpoint-header {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-end: 10px;
+}
+
+.user-display-name {
+  font-size: 1.02rem;
+  overflow-wrap: anywhere;
+}
+
+.firebase-badge {
+  font-size: 0.66rem;
+  padding: 4px 8px;
+}
+
+.coords-grid {
+  gap: 6px;
+  margin-block-end: 10px;
+}
+
+.metric-tile {
+  padding: 7px 9px;
+  min-inline-size: 0;
+}
+
+.metric-label {
+  font-size: 0.62rem;
+}
+
+.metric-val {
+  font-size: 0.78rem;
+}
+
+.card-action-btn {
+  padding: 8px 10px;
+  min-height: 38px;
+  font-size: 0.76rem;
+}
+
+.bookmark-tab {
+  inset-inline-start: var(--safe-inline);
+  padding: 8px 5px 10px;
+  gap: 5px;
+  border: 1px solid var(--border-medium);
+  border-radius: 14px;
+}
+
+.bookmark-accent-bar {
+  border-radius: 4px;
+}
+
+.bookmark-chevron {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.bookmark-pin-icon {
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.bookmark-pin-icon svg {
+  inline-size: 15px;
+  block-size: 15px;
+}
+
+.bookmark-coords {
+  font-size: 0.58rem;
+  max-block-size: 76px;
+}
+
+.bookmark-label {
+  font-size: 0.62rem;
+  max-block-size: 68px;
+}
+
+.floating-user-pill {
+  inset-block-start: var(--safe-top);
+  inset-inline-start: var(--safe-inline);
+  max-inline-size: calc(100dvw - (var(--safe-inline) * 2));
+  padding: 6px 10px 6px 8px;
+  gap: 8px;
+}
+
+.fup-icon {
+  inline-size: 24px;
+  block-size: 24px;
+}
+
+.fup-icon svg {
+  inline-size: 14px;
+  block-size: 14px;
+}
+
+.fup-body {
+  min-inline-size: 0;
+}
+
+.fup-name {
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fup-coords {
+  font-size: 0.64rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud-top-right {
+  inset-block-start: var(--safe-top);
+  inset-inline-start: var(--safe-inline);
+  inset-inline-end: var(--safe-inline);
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 5px;
+}
+
+.app-shell.is-collapsed .globe-stage:has(.floating-user-pill:not(.is-hidden)) .hud-top-right {
+  inset-block-start: calc(var(--safe-top) + 42px);
+}
+
+.segmented-control {
+  padding: 3px;
+  max-inline-size: 100%;
+}
+
+.seg-btn {
+  padding: 5px 9px;
+  font-size: 0.68rem;
+}
+
+.layer-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.hud-chip {
+  padding: 4px 8px;
+  font-size: 0.66rem;
+}
+
+.hud-controls {
+  inset-inline-end: var(--safe-inline);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  gap: 6px;
+}
+
+.app-shell:not(.is-collapsed) .hud-controls {
+  inset-block-start: auto;
+  inset-block-end: calc(var(--safe-bottom) + var(--mobile-panel-height) + 64px);
+  transform: none;
+  flex-direction: row;
+}
+
+.app-shell:not(.is-collapsed) .hud-control-group {
+  flex-direction: row;
+}
+
+.hud-icon-btn {
+  inline-size: 30px;
+  block-size: 30px;
+  border-radius: 8px;
+}
+
+.hud-icon-btn svg {
+  inline-size: 15px;
+  block-size: 15px;
+}
+
+.hud-text-badge {
+  font-size: 0.66rem;
+}
+
+.hud-bottom-bar {
+  inset-inline-start: var(--safe-inline);
+  inset-inline-end: var(--safe-inline);
+  inset-block-end: var(--safe-bottom);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+}
+
+.app-shell:not(.is-collapsed) .hud-bottom-bar {
+  inset-block-end: calc(var(--safe-bottom) + var(--mobile-panel-height) + 6px);
+}
+
+.altitude-tiers {
+  display: flex;
+  flex: 1 1 100%;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+.tier-btn {
+  flex: 1;
+  text-align: center;
+  padding: 4px 5px;
+  font-size: 0.66rem;
+}
+
+.telemetry-divider {
+  display: none;
+}
+
+.telemetry-readouts {
+  display: flex;
+  flex: 1 1 100%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+
+.telemetry-item {
+  display: inline-flex;
+  min-inline-size: 0;
+  gap: 4px;
+}
+
+.telemetry-label {
+  font-size: 0.58rem;
+}
+
+.telemetry-value {
+  font-size: 0.64rem;
+  min-inline-size: 0;
+}
+
+.globe-canvas .maplibregl-ctrl-bottom-left {
+  inset-inline-start: var(--safe-inline);
+  inset-block-end: calc(var(--safe-bottom) + 60px);
+}
+
+.app-shell:not(.is-collapsed) .globe-canvas .maplibregl-ctrl-bottom-left {
+  transform: translateY(calc(-1 * (var(--mobile-panel-height) + 6px)));
+}
+
+.earth-pin-label {
+  max-inline-size: calc(100dvw - (var(--safe-inline) * 2) - 16px);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px 6px;
+  padding: 5px 10px;
+  white-space: normal;
+  text-align: center;
+}
+
+.earth-pin-city {
+  font-size: 0.74rem;
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.earth-pin-temp {
+  font-size: 0.68rem;
+}
+
+dialog:modal {
+  inline-size: min(332px, calc(100dvw - (var(--safe-inline) * 2) - 8px));
+  max-block-size: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 16px);
+  padding: 16px;
+  gap: 12px;
+}
+
+.dialog-title {
+  font-size: 1.08rem;
+}
+
+.dialog-subtitle {
+  font-size: 0.78rem;
+  line-height: 1.42;
+}
+
+.dialog-close-btn {
+  inline-size: 32px;
+  block-size: 32px;
+}
+
+.dialog-form {
+  gap: 12px;
+}
+
+.field,
+.field input {
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+.field label {
+  font-size: 0.8rem;
+}
+
+.field input {
+  min-height: 42px;
+  padding: 0.55rem 0.75rem;
+}
+
+.geo-status-box {
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  font-size: 0.76rem;
+  gap: 8px;
+}
+
+.manual-coords-grid {
+  grid-template-columns: 1fr;
+}
+
+.btn-submit {
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+}
+
+/* Tablet (640px - 768px): Tablets (portrait) */
+@media (min-width: 640px) {
+  :root {
+    --panel-width: 280px;
+    --bookmark-width: 50px;
+  }
+
+  .explorer-panel {
+    inset-block: 0;
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+    inline-size: var(--panel-width);
+    block-size: 100dvh;
+    border: none;
+    border-inline-end: 1px solid var(--border-subtle);
+    border-radius: 0;
+  }
+
+  .app-shell.is-collapsed .explorer-panel {
+    transform: translate3d(calc(-100% - 16px), 0, 0);
+  }
+
+  .panel-header {
+    padding: 16px 16px 14px;
+  }
+
+  .brand-mark {
+    inline-size: 34px;
+    block-size: 34px;
+    border-radius: 10px;
+  }
+
+  .brand-mark svg {
+    inline-size: 20px;
+    block-size: 20px;
+  }
+
+  .brand-text h1 {
+    font-size: 1rem;
+  }
+
+  .brand-sub {
+    font-size: 0.66rem;
+  }
+
+  .collapse-btn {
+    inline-size: 32px;
+    block-size: 32px;
+  }
+
+  .panel-scroll {
+    padding: 14px 16px 22px;
+    gap: 14px;
+  }
+
+  .welcome-card,
+  .pinpoint-card {
+    padding: 14px;
+  }
+
+  .bookmark-tab {
+    inset-inline-start: 0;
+    padding: 12px 7px 14px;
+    gap: 8px;
+    border-inline-start: none;
+    border-radius: 0 16px 16px 0;
+  }
+
+  .bookmark-accent-bar {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .bookmark-coords {
+    font-size: 0.62rem;
+    max-block-size: 105px;
+  }
+
+  .bookmark-label {
+    font-size: 0.66rem;
+    max-block-size: 95px;
+  }
+
+  .floating-user-pill {
+    inset-block-start: 14px;
+    inset-inline-start: 14px;
+    max-inline-size: calc(100dvw - 260px);
+    padding: 7px 12px 7px 10px;
+    gap: 10px;
+  }
+
+  .hud-top-right,
+  .app-shell.is-collapsed .globe-stage:has(.floating-user-pill:not(.is-hidden)) .hud-top-right {
+    inset-block-start: 14px;
+    inset-inline-end: 14px;
+    inset-inline-start: auto;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .hud-controls,
+  .app-shell:not(.is-collapsed) .hud-controls {
+    inset-inline-end: 14px;
+    inset-block-start: 50%;
+    inset-block-end: auto;
+    transform: translateY(-50%);
+    flex-direction: column;
     gap: 8px;
   }
-  .telemetry-item:last-child {
-    display: none;
+
+  .app-shell:not(.is-collapsed) .hud-control-group {
+    flex-direction: column;
+  }
+
+  .hud-icon-btn {
+    inline-size: 34px;
+    block-size: 34px;
+    border-radius: 10px;
+  }
+
+  .hud-bottom-bar,
+  .app-shell:not(.is-collapsed) .hud-bottom-bar {
+    inset-inline-start: auto;
+    inset-inline-end: 14px;
+    inset-block-end: 14px;
+    max-inline-size: calc(100dvw - var(--bookmark-width) - 28px);
+    justify-content: center;
+    padding: 6px 12px;
+    gap: 6px 10px;
+  }
+
+  .app-shell:not(.is-collapsed) .hud-bottom-bar {
+    max-inline-size: calc(100dvw - var(--panel-width) - 28px);
+  }
+
+  .altitude-tiers {
+    flex: 0 1 auto;
+    justify-content: center;
+    gap: 3px;
+  }
+
+  .tier-btn {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    font-size: 0.7rem;
+  }
+
+  .telemetry-readouts {
+    flex: 0 1 auto;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .telemetry-value {
+    font-size: 0.7rem;
+  }
+
+  .globe-canvas .maplibregl-ctrl-bottom-left {
+    inset-inline-start: 14px;
+    inset-block-end: 14px;
+  }
+
+  .app-shell:not(.is-collapsed) .globe-canvas .maplibregl-ctrl-bottom-left {
+    transform: translateX(var(--panel-width));
+  }
+
+  .earth-pin-label {
+    max-inline-size: none;
+    white-space: nowrap;
+    padding: 6px 12px;
+    gap: 8px;
+  }
+
+  .earth-pin-city {
+    font-size: 0.8rem;
+  }
+
+  .earth-pin-temp {
+    font-size: 0.73rem;
+  }
+
+  dialog:modal {
+    inline-size: min(440px, calc(100dvw - 32px));
+    max-block-size: calc(100dvh - 32px);
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .dialog-title {
+    font-size: 1.2rem;
+  }
+
+  .dialog-subtitle {
+    font-size: 0.84rem;
+  }
+
+  .dialog-close-btn {
+    inline-size: 36px;
+    block-size: 36px;
+  }
+
+  .dialog-form {
+    gap: 16px;
+  }
+
+  .field input {
+    min-height: 48px;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .manual-coords-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .btn-submit {
+    min-height: 48px;
+    padding: 12px 18px;
+    font-size: 0.92rem;
   }
 }
 
-@media (max-width: 640px) {
+/* Laptop (768px - 1024px): Small laptops */
+@media (min-width: 768px) {
   :root {
-    --panel-width: 100dvw;
-    --bookmark-width: 48px;
+    --panel-width: 330px;
+    --bookmark-width: 54px;
   }
-  .hud-top-right {
-    inset-block-start: 12px;
-    inset-inline-end: 12px;
+
+  .panel-header {
+    padding: 18px 18px 14px;
   }
-  .layer-toggles,
-  .altitude-tiers,
+
+  .brand-mark {
+    inline-size: 36px;
+    block-size: 36px;
+  }
+
+  .brand-mark svg {
+    inline-size: 22px;
+    block-size: 22px;
+  }
+
+  .brand-text h1 {
+    font-size: 1.04rem;
+  }
+
+  .brand-sub {
+    font-size: 0.68rem;
+  }
+
+  .panel-scroll {
+    padding: 16px 18px 24px;
+    gap: 16px;
+  }
+
+  .welcome-card,
+  .pinpoint-card {
+    padding: 16px;
+  }
+
+  .user-display-name {
+    font-size: 1.24rem;
+  }
+
+  .metric-val {
+    font-size: 0.88rem;
+  }
+
+  .bookmark-tab {
+    padding: 14px 8px 16px;
+    gap: 9px;
+    border-radius: 0 18px 18px 0;
+  }
+
+  .bookmark-coords {
+    font-size: 0.64rem;
+    max-block-size: 125px;
+  }
+
+  .bookmark-label {
+    font-size: 0.69rem;
+    max-block-size: 112px;
+  }
+
+  .floating-user-pill {
+    inset-block-start: 16px;
+    inset-inline-start: 16px;
+    max-inline-size: calc(100dvw - 290px);
+    padding: 8px 13px 8px 11px;
+  }
+
+  .fup-icon {
+    inline-size: 30px;
+    block-size: 30px;
+  }
+
+  .fup-name {
+    font-size: 0.88rem;
+  }
+
+  .fup-coords {
+    font-size: 0.7rem;
+  }
+
+  .hud-top-right,
+  .app-shell.is-collapsed .globe-stage:has(.floating-user-pill:not(.is-hidden)) .hud-top-right {
+    inset-block-start: 16px;
+    inset-inline-end: 16px;
+    gap: 7px;
+  }
+
+  .seg-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+
+  .hud-chip {
+    padding: 6px 10px;
+    font-size: 0.71rem;
+  }
+
+  .hud-controls,
+  .app-shell:not(.is-collapsed) .hud-controls {
+    inset-inline-end: 16px;
+    gap: 9px;
+  }
+
+  .hud-icon-btn {
+    inline-size: 36px;
+    block-size: 36px;
+  }
+
+  .hud-icon-btn svg {
+    inline-size: 17px;
+    block-size: 17px;
+  }
+
+  .hud-bottom-bar,
+  .app-shell:not(.is-collapsed) .hud-bottom-bar {
+    inset-inline-end: 16px;
+    inset-block-end: 16px;
+    max-inline-size: calc(100dvw - var(--bookmark-width) - 32px);
+  }
+
+  .app-shell:not(.is-collapsed) .hud-bottom-bar {
+    max-inline-size: calc(100dvw - var(--panel-width) - 32px);
+  }
+
+  .telemetry-readouts {
+    gap: 12px;
+  }
+
+  .telemetry-value {
+    font-size: 0.72rem;
+  }
+}
+
+/* Desktop (1024px - 1280px): Laptops & desktops */
+@media (min-width: 1024px) {
+  :root {
+    --panel-width: 380px;
+    --bookmark-width: 58px;
+  }
+
+  .panel-header {
+    padding: 20px 20px 16px;
+  }
+
+  .brand-mark {
+    inline-size: 38px;
+    block-size: 38px;
+    border-radius: 12px;
+  }
+
+  .brand-mark svg {
+    inline-size: 24px;
+    block-size: 24px;
+  }
+
+  .brand-text h1 {
+    font-size: 1.08rem;
+  }
+
+  .brand-sub {
+    font-size: 0.7rem;
+  }
+
+  .collapse-btn {
+    inline-size: 34px;
+    block-size: 34px;
+  }
+
+  .panel-scroll {
+    padding: 18px 20px 28px;
+    gap: 18px;
+  }
+
+  .welcome-card,
+  .pinpoint-card {
+    padding: 18px;
+  }
+
+  .welcome-copy {
+    margin: 0 0 14px;
+    font-size: 0.85rem;
+  }
+
+  .user-display-name {
+    font-size: 1.35rem;
+  }
+
+  .metric-tile {
+    padding: 10px 12px;
+  }
+
+  .metric-val {
+    font-size: 0.92rem;
+  }
+
+  .card-action-btn {
+    padding: 10px 14px;
+    min-height: 44px;
+    font-size: 0.82rem;
+  }
+
+  .bookmark-tab {
+    padding: 15px 9px 18px;
+    gap: 10px;
+    border-radius: 0 20px 20px 0;
+  }
+
+  .bookmark-chevron {
+    inline-size: 26px;
+    block-size: 26px;
+  }
+
+  .bookmark-pin-icon {
+    inline-size: 24px;
+    block-size: 24px;
+  }
+
+  .bookmark-pin-icon svg {
+    inline-size: 20px;
+    block-size: 20px;
+  }
+
+  .bookmark-coords {
+    font-size: 0.66rem;
+    max-block-size: 150px;
+  }
+
+  .bookmark-label {
+    font-size: 0.72rem;
+    max-block-size: 130px;
+  }
+
+  .floating-user-pill {
+    inset-block-start: 18px;
+    inset-inline-start: 18px;
+    max-inline-size: none;
+    padding: 9px 14px 9px 12px;
+    gap: 12px;
+  }
+
+  .fup-icon {
+    inline-size: 32px;
+    block-size: 32px;
+  }
+
+  .fup-icon svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+
+  .fup-name {
+    font-size: 0.92rem;
+  }
+
+  .fup-coords {
+    font-size: 0.72rem;
+  }
+
+  .hud-top-right,
+  .app-shell.is-collapsed .globe-stage:has(.floating-user-pill:not(.is-hidden)) .hud-top-right {
+    inset-block-start: 18px;
+    inset-inline-end: 18px;
+    gap: 8px;
+  }
+
+  .segmented-control {
+    padding: 4px;
+  }
+
+  .seg-btn {
+    padding: 7px 14px;
+    font-size: 0.78rem;
+  }
+
+  .layer-toggles {
+    gap: 6px;
+  }
+
+  .hud-chip {
+    padding: 6px 11px;
+    font-size: 0.73rem;
+  }
+
+  .hud-controls,
+  .app-shell:not(.is-collapsed) .hud-controls {
+    inset-inline-end: 18px;
+    gap: 10px;
+  }
+
+  .hud-icon-btn {
+    inline-size: 38px;
+    block-size: 38px;
+    border-radius: 11px;
+  }
+
+  .hud-icon-btn svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+
+  .hud-text-badge {
+    font-size: 0.72rem;
+  }
+
+  .hud-bottom-bar,
+  .app-shell:not(.is-collapsed) .hud-bottom-bar {
+    inset-inline-end: 18px;
+    inset-block-end: 18px;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 6px 14px 6px 7px;
+    border-radius: var(--radius-pill);
+  }
+
+  .tier-btn {
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+
   .telemetry-divider {
-    display: none;
+    display: block;
   }
-  .hud-controls {
-    inset-inline-end: 12px;
+
+  .telemetry-readouts {
+    flex-wrap: nowrap;
+    gap: 14px;
   }
-  .manual-coords-grid {
-    grid-template-columns: 1fr;
+
+  .telemetry-label {
+    font-size: 0.64rem;
+  }
+
+  .telemetry-value {
+    font-size: 0.75rem;
+    min-inline-size: 74px;
+  }
+
+  .globe-canvas .maplibregl-ctrl-bottom-left {
+    inset-inline-start: 16px;
+    inset-block-end: 16px;
+  }
+
+  dialog:modal {
+    padding: 24px;
+  }
+}
+
+/* Large (>= 1280px): Large screens (HD/4K) */
+@media (min-width: 1280px) {
+  :root {
+    --panel-width: 420px;
+  }
+
+  .floating-user-pill {
+    inset-block-start: 20px;
+    inset-inline-start: 20px;
+  }
+
+  .hud-top-right,
+  .app-shell.is-collapsed .globe-stage:has(.floating-user-pill:not(.is-hidden)) .hud-top-right {
+    inset-block-start: 20px;
+    inset-inline-end: 20px;
+  }
+
+  .hud-controls,
+  .app-shell:not(.is-collapsed) .hud-controls {
+    inset-inline-end: 20px;
+  }
+
+  .hud-bottom-bar,
+  .app-shell:not(.is-collapsed) .hud-bottom-bar {
+    inset-inline-end: 20px;
+    inset-block-end: 20px;
   }
 }
