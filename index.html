@@ -484,11 +484,18 @@
       hudCoords: document.getElementById('hudCoords')
     };
 
+    const STORAGE_KEY = 'pinpoint_user_name';
+
     const state = {
       isCollapsed: false,
       detectedCoords: null,
       isDetectingGeo: false,
-      activeUser: null
+      activeUser: null,
+      trackedUserName: null,
+      watchId: null,
+      heartbeatTimer: null,
+      lastSentTime: 0,
+      wakeLock: null
     };
 
     function formatAltitude(meters) {
@@ -732,12 +739,14 @@
       const localTime = opts.localTime || formatLocalTime(opts.timestamp || new Date());
 
       globe.setUserPinpointMarker(lat, lon, name, localTime);
-      globe.flyToLocation(lat, lon, {
-        zoom: opts.zoom ?? 14.5,
-        pitch: opts.pitch ?? 52,
-        bearing: opts.bearing ?? -14,
-        paddingLeft: 0
-      });
+      if (!opts.silent) {
+        globe.flyToLocation(lat, lon, {
+          zoom: opts.zoom ?? 14.5,
+          pitch: opts.pitch ?? 52,
+          bearing: opts.bearing ?? -14,
+          paddingLeft: 0
+        });
+      }
 
       dom.bookmarkLabel.textContent = name.toUpperCase();
       dom.bookmarkCoords.textContent = shortCoords;
@@ -756,7 +765,119 @@
       dom.firebaseBadge.textContent = firebaseStateText;
       dom.firebaseBadge.className = `firebase-badge ${firebaseStatusClass}`.trim();
 
-      setPanelCollapsed(true, true);
+      if (!opts.silent) {
+        setPanelCollapsed(true, true);
+      }
+    }
+
+    async function requestWakeLock() {
+      if (!('wakeLock' in navigator) || state.wakeLock) return;
+      try {
+        state.wakeLock = await navigator.wakeLock.request('screen');
+        state.wakeLock.addEventListener('release', () => {
+          state.wakeLock = null;
+        });
+      } catch {
+        // Wake Lock may be unavailable on low battery or background tabs
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && state.trackedUserName) {
+        requestWakeLock();
+      }
+    });
+
+    function startContinuousTracking(userName) {
+      const cleanName = userName.trim();
+      if (!cleanName) return;
+
+      state.trackedUserName = cleanName;
+      try {
+        localStorage.setItem(STORAGE_KEY, cleanName);
+      } catch {
+        // Ignore storage errors in private browsing
+      }
+
+      requestWakeLock();
+
+      if (!('geolocation' in navigator)) return;
+
+      if (state.watchId !== null) {
+        navigator.geolocation.clearWatch(state.watchId);
+        state.watchId = null;
+      }
+      if (state.heartbeatTimer) {
+        clearInterval(state.heartbeatTimer);
+        state.heartbeatTimer = null;
+      }
+
+      const pushPositionUpdate = (latitude, longitude, force = false) => {
+        const nowMs = Date.now();
+        if (!force && nowMs - state.lastSentTime < 3000) return;
+        state.lastSentTime = nowMs;
+
+        state.detectedCoords = { latitude, longitude };
+        const localTime = formatLocalTime(new Date(nowMs));
+        const activeName = state.trackedUserName;
+        if (!activeName) return;
+
+        const isViewingSelf =
+          !state.activeUser ||
+          state.activeUser.name.trim().toLowerCase() === activeName.trim().toLowerCase();
+
+        if (isViewingSelf) {
+          state.activeUser = { name: activeName, latitude, longitude, localTime };
+          updateUIWithPinpoint(activeName, latitude, longitude, 'Live Tracking', 'is-saved', {
+            localTime,
+            silent: true
+          });
+        }
+
+        saveToFirebase(activeName, latitude, longitude, localTime);
+      };
+
+      state.watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const latitude = Number(position.coords.latitude.toFixed(6));
+          const longitude = Number(position.coords.longitude.toFixed(6));
+          pushPositionUpdate(latitude, longitude, false);
+        },
+        (err) => {
+          console.warn('Live GPS watch error:', err);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        }
+      );
+
+      // Periodic heartbeat so stationary users still transmit live localTime & coordinates
+      state.heartbeatTimer = setInterval(() => {
+        if (!state.trackedUserName) return;
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const latitude = Number(position.coords.latitude.toFixed(6));
+            const longitude = Number(position.coords.longitude.toFixed(6));
+            pushPositionUpdate(latitude, longitude, true);
+          },
+          () => {
+            if (state.detectedCoords) {
+              pushPositionUpdate(
+                state.detectedCoords.latitude,
+                state.detectedCoords.longitude,
+                true
+              );
+            }
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 8000,
+            maximumAge: 3000
+          }
+        );
+      }, 10000);
     }
 
     function toPersonKey(name) {
@@ -794,7 +915,10 @@
         };
 
         await update(pinpointsRef, updates);
-        dom.firebaseBadge.textContent = 'Saved to Firebase';
+        const isLiveSelf =
+          state.trackedUserName &&
+          state.trackedUserName.trim().toLowerCase() === normalized;
+        dom.firebaseBadge.textContent = isLiveSelf ? 'Live Tracking' : 'Saved to Firebase';
         dom.firebaseBadge.className = 'firebase-badge is-saved';
       } catch (err) {
         console.error('Firebase write failed:', err);
@@ -889,6 +1013,32 @@
             li.appendChild(btn);
             dom.recentList.appendChild(li);
           });
+
+          // If currently viewing a user on the globe, sync their live position & localTime in real time
+          if (state.activeUser && state.activeUser.name) {
+            const activeKey = state.activeUser.name.trim().toLowerCase();
+            const liveRecord = latestByPerson.get(activeKey);
+            if (liveRecord) {
+              const liveTime = liveRecord.localTime || formatLocalTime(liveRecord.timestamp || liveRecord.createdAt);
+              const isSelf =
+                state.trackedUserName &&
+                state.trackedUserName.trim().toLowerCase() === activeKey;
+              state.activeUser = {
+                name: liveRecord.name || state.activeUser.name,
+                latitude: liveRecord.latitude,
+                longitude: liveRecord.longitude,
+                localTime: liveTime
+              };
+              updateUIWithPinpoint(
+                state.activeUser.name,
+                liveRecord.latitude,
+                liveRecord.longitude,
+                isSelf ? 'Live Tracking' : 'Saved to Firebase',
+                'is-saved',
+                { localTime: liveTime, silent: true }
+              );
+            }
+          }
         },
         (err) => {
           console.error('Firebase read failed:', err);
@@ -951,8 +1101,10 @@
 
       const localTime = formatLocalTime(new Date());
       state.activeUser = { name: userName, ...coords, localTime };
+      state.lastSentTime = Date.now();
       dom.pinpointDialog.close('submit');
       updateUIWithPinpoint(userName, coords.latitude, coords.longitude, 'Syncing…', '', { localTime });
+      startContinuousTracking(userName);
       await saveToFirebase(userName, coords.latitude, coords.longitude, localTime);
     });
 
@@ -1009,9 +1161,40 @@
       }
     });
 
+    async function initAutoTrackingOrDialog() {
+      let savedName = '';
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        savedName = (urlParams.get('name') || localStorage.getItem(STORAGE_KEY) || '').trim();
+      } catch {
+        savedName = '';
+      }
+
+      if (savedName) {
+        dom.userNameInput.value = savedName;
+        const coords = await requestBrowserLocation();
+        if (coords) {
+          const localTime = formatLocalTime(new Date());
+          state.activeUser = { name: savedName, ...coords, localTime };
+          state.lastSentTime = Date.now();
+          if (dom.pinpointDialog.open) {
+            dom.pinpointDialog.close('auto');
+          }
+          updateUIWithPinpoint(savedName, coords.latitude, coords.longitude, 'Live Tracking', 'is-saved', {
+            localTime
+          });
+          startContinuousTracking(savedName);
+          await saveToFirebase(savedName, coords.latitude, coords.longitude, localTime);
+          return;
+        }
+      }
+
+      openPinpointDialog();
+    }
+
     setupAccessibleValidation();
     subscribeToRecentPinpoints();
-    openPinpointDialog();
+    initAutoTrackingOrDialog();
   </script>
 </body>
 </html>
