@@ -1389,25 +1389,24 @@ dialog::backdrop {
 :root {
   --panel-width: 100dvw;
   --bookmark-width: 38px;
-  --safe-inline: max(42px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
-  --safe-top: max(74px, env(safe-area-inset-top, 0px));
-  --safe-bottom: max(74px, env(safe-area-inset-bottom, 0px));
-  --mobile-panel-height: clamp(190px, 32dvh, 245px);
+  --edge-gap: 6px;
+  --mobile-panel-height: clamp(195px, 34dvh, 255px);
 }
 
 .explorer-panel {
   inset-block-start: auto;
-  inset-block-end: var(--safe-bottom);
-  inset-inline-start: var(--safe-inline);
-  inset-inline-end: var(--safe-inline);
-  inline-size: auto;
+  inset-block-end: 0;
+  inset-inline: 0;
+  inline-size: 100%;
   block-size: var(--mobile-panel-height);
-  border: 1px solid var(--border-medium);
-  border-radius: 18px;
+  border-inline: none;
+  border-block-end: none;
+  border-block-start: 1px solid var(--border-medium);
+  border-radius: 18px 18px 0 0;
 }
 
 .app-shell.is-collapsed .explorer-panel {
-  transform: translate3d(0, calc(100% + var(--safe-bottom) + 20px), 0);
+  transform: translate3d(0, calc(100% + 20px), 0);
 }
 
 .panel-header {
@@ -1494,15 +1493,16 @@ dialog::backdrop {
 }
 
 .bookmark-tab {
-  inset-inline-start: var(--safe-inline);
+  inset-inline-start: 0;
   padding: 8px 5px 10px;
   gap: 5px;
   border: 1px solid var(--border-medium);
-  border-radius: 14px;
+  border-inline-start: none;
+  border-radius: 0 14px 14px 0;
 }
 
 .bookmark-accent-bar {
-  border-radius: 4px;
+  border-radius: 0 4px 4px 0;
 }
 
 .bookmark-chevron {
@@ -1531,9 +1531,9 @@ dialog::backdrop {
 }
 
 .floating-user-pill {
-  inset-block-start: var(--safe-top);
-  inset-inline-start: var(--safe-inline);
-  max-inline-size: calc(100dvw - (var(--safe-inline) * 2));
+  inset-block-start: var(--edge-gap);
+  inset-inline-start: var(--edge-gap);
+  max-inline-size: calc(100dvw - (var(--edge-gap) * 2));
   padding: 6px 10px 6px 8px;
   gap: 8px;
 }
@@ -1567,9 +1567,9 @@ dialog::backdrop {
 }
 
 .hud-top-right {
-  inset-block-start: var(--safe-top);
-  inset-inline-start: var(--safe-inline);
-  inset-inline-end: var(--safe-inline);
+  inset-block-start: var(--edge-gap);
+  inset-inline-start: var(--edge-gap);
+  inset-inline-end: var(--edge-gap);
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -1578,7 +1578,7 @@ dialog::backdrop {
 }
 
 .app-shell.is-collapsed .globe-stage:has(.floating-user-pill:not(.is-hidden)) .hud-top-right {
-  inset-block-start: calc(var(--safe-top) + 42px);
+  inset-block-start: calc(var(--edge-gap) + 42px);
 }
 
 .segmented-control {
@@ -1603,7 +1603,7 @@ dialog::backdrop {
 }
 
 .hud-controls {
-  inset-inline-end: var(--safe-inline);
+  inset-inline-end: var(--edge-gap);
   inset-block-start: 50%;
   transform: translateY(-50%);
   gap: 6px;
@@ -1611,7 +1611,7 @@ dialog::backdrop {
 
 .app-shell:not(.is-collapsed) .hud-controls {
   inset-block-start: auto;
-  inset-block-end: calc(var(--safe-bottom) + var(--mobile-panel-height) + 64px);
+  inset-block-end: calc(var(--mobile-panel-height) + 64px);
   transform: none;
   flex-direction: row;
 }
@@ -1636,9 +1636,9 @@ dialog::backdrop {
 }
 
 .hud-bottom-bar {
-  inset-inline-start: var(--safe-inline);
-  inset-inline-end: var(--safe-inline);
-  inset-block-end: var(--safe-bottom);
+  inset-inline-start: var(--edge-gap);
+  inset-inline-end: var(--edge-gap);
+  inset-block-end: var(--edge-gap);
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 4px 6px;
@@ -1647,7 +1647,7 @@ dialog::backdrop {
 }
 
 .app-shell:not(.is-collapsed) .hud-bottom-bar {
-  inset-block-end: calc(var(--safe-bottom) + var(--mobile-panel-height) + 6px);
+  inset-block-end: calc(var(--mobile-panel-height) + 6px);
 }
 
 .altitude-tiers {
@@ -1692,16 +1692,16 @@ dialog::backdrop {
 }
 
 .globe-canvas .maplibregl-ctrl-bottom-left {
-  inset-inline-start: var(--safe-inline);
-  inset-block-end: calc(var(--safe-bottom) + 60px);
+  inset-inline-start: var(--edge-gap);
+  inset-block-end: calc(var(--edge-gap) + 58px);
 }
 
 .app-shell:not(.is-collapsed) .globe-canvas .maplibregl-ctrl-bottom-left {
-  transform: translateY(calc(-1 * (var(--mobile-panel-height) + 6px)));
+  transform: translateY(calc(-1 * var(--mobile-panel-height)));
 }
 
 .earth-pin-label {
-  max-inline-size: calc(100dvw - (var(--safe-inline) * 2) - 16px);
+  max-inline-size: calc(100dvw - 24px);
   flex-wrap: wrap;
   justify-content: center;
   gap: 2px 6px;
@@ -1722,8 +1722,8 @@ dialog::backdrop {
 }
 
 dialog:modal {
-  inline-size: min(332px, calc(100dvw - (var(--safe-inline) * 2) - 8px));
-  max-block-size: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 16px);
+  inline-size: min(400px, calc(100dvw - 24px));
+  max-block-size: calc(100dvh - 24px);
   padding: 16px;
   gap: 12px;
 }
