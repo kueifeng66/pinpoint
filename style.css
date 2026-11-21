@@ -696,6 +696,10 @@ input:focus-visible {
   border: 1px solid rgba(148, 197, 255, 0.09);
 }
 
+.metric-tile--full {
+  grid-column: 1 / -1;
+}
+
 .metric-label {
   font-size: 0.68rem;
   font-weight: 500;
@@ -821,10 +825,25 @@ input:focus-visible {
   color: var(--text-primary);
 }
 
+.recent-item-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: end;
+}
+
 .recent-item-coords {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--accent-primary);
+}
+
+.recent-item-time {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .empty-recent {
@@ -1278,10 +1297,11 @@ dialog::backdrop {
 
 .earth-pin-label {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
+  gap: 2px;
+  padding: 6px 14px;
+  border-radius: 16px;
   background: rgba(8, 15, 32, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -1292,6 +1312,14 @@ dialog::backdrop {
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
   white-space: nowrap;
   transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.earth-pin-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .earth-pin-stem {
@@ -1318,6 +1346,14 @@ dialog::backdrop {
   font-size: 0.73rem;
   font-weight: 500;
   color: var(--accent-primary);
+}
+
+.earth-pin-time {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
 }
 
 .earth-pin-beacon {
@@ -1702,12 +1738,14 @@ dialog::backdrop {
 
 .earth-pin-label {
   max-inline-size: calc(100dvw - 24px);
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2px 6px;
-  padding: 5px 10px;
+  gap: 2px;
+  padding: 5px 12px;
   white-space: normal;
   text-align: center;
+}
+
+.earth-pin-row {
+  gap: 2px 6px;
 }
 
 .earth-pin-city {
@@ -1719,6 +1757,10 @@ dialog::backdrop {
 
 .earth-pin-temp {
   font-size: 0.68rem;
+}
+
+.earth-pin-time {
+  font-size: 0.62rem;
 }
 
 dialog:modal {
@@ -1947,7 +1989,11 @@ dialog:modal {
   .earth-pin-label {
     max-inline-size: none;
     white-space: nowrap;
-    padding: 6px 12px;
+    padding: 6px 14px;
+    gap: 2px;
+  }
+
+  .earth-pin-row {
     gap: 8px;
   }
 
@@ -1957,6 +2003,10 @@ dialog:modal {
 
   .earth-pin-temp {
     font-size: 0.73rem;
+  }
+
+  .earth-pin-time {
+    font-size: 0.68rem;
   }
 
   dialog:modal {

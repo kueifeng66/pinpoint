@@ -748,9 +748,9 @@
      * Place or update the primary user pinpoint marker on the globe.
      * Displays the user's name and formatted latitude/longitude coordinates.
      */
-    setUserPinpointMarker(lat, lon, userName) {
+    setUserPinpointMarker(lat, lon, userName, localTimeText = '') {
       const coordsText = `${Number(lat).toFixed(4)}°, ${Number(lon).toFixed(4)}°`;
-      this.activeLocation = { lat, lng: lon, name: userName, coordsText };
+      this.activeLocation = { lat, lng: lon, name: userName, coordsText, localTimeText };
 
       if (!this.activeMarker) {
         const wrapper = document.createElement('div');
@@ -760,14 +760,23 @@
         const pill = document.createElement('div');
         pill.className = 'earth-pin-label';
 
+        const topRow = document.createElement('div');
+        topRow.className = 'earth-pin-row';
+
         const nameSpan = document.createElement('span');
         nameSpan.className = 'earth-pin-city';
 
         const coordsSpan = document.createElement('span');
         coordsSpan.className = 'earth-pin-temp';
 
-        pill.appendChild(nameSpan);
-        pill.appendChild(coordsSpan);
+        topRow.appendChild(nameSpan);
+        topRow.appendChild(coordsSpan);
+
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'earth-pin-time';
+
+        pill.appendChild(topRow);
+        pill.appendChild(timeSpan);
 
         const stem = document.createElement('span');
         stem.className = 'earth-pin-stem';
@@ -789,7 +798,7 @@
           this.onMarkerClick(this.activeLocation);
         });
 
-        this.markerElements = { nameSpan, coordsSpan };
+        this.markerElements = { nameSpan, coordsSpan, timeSpan };
         this.activeMarker = new maplibregl.Marker({
           element: wrapper,
           anchor: 'bottom'
@@ -803,6 +812,8 @@
       if (this.markerElements) {
         this.markerElements.nameSpan.textContent = userName || 'You';
         this.markerElements.coordsSpan.textContent = coordsText;
+        this.markerElements.timeSpan.textContent = localTimeText;
+        this.markerElements.timeSpan.classList.toggle('is-hidden', !localTimeText);
       }
     }
 

@@ -267,6 +267,10 @@
               <span class="metric-label">Longitude</span>
               <span class="metric-val" id="userLonVal">—</span>
             </div>
+            <div class="metric-tile metric-tile--full">
+              <span class="metric-label">Local Time</span>
+              <span class="metric-val" id="userTimeVal">—</span>
+            </div>
           </div>
 
           <div class="pinpoint-actions">
@@ -441,6 +445,7 @@
       firebaseBadge: document.getElementById('firebaseBadge'),
       userLatVal: document.getElementById('userLatVal'),
       userLonVal: document.getElementById('userLonVal'),
+      userTimeVal: document.getElementById('userTimeVal'),
       cardStreetZoomBtn: document.getElementById('cardStreetZoomBtn'),
       cardUpdateBtn: document.getElementById('cardUpdateBtn'),
 
@@ -497,6 +502,22 @@
       const latDir = lat >= 0 ? 'N' : 'S';
       const lonDir = lon >= 0 ? 'E' : 'W';
       return `${Math.abs(lat).toFixed(4)}° ${latDir}, ${Math.abs(lon).toFixed(4)}° ${lonDir}`;
+    }
+
+    function formatLocalTime(value) {
+      let date;
+      if (value instanceof Date) {
+        date = value;
+      } else if (typeof value === 'number' && value > 0) {
+        date = new Date(value);
+      } else if (typeof value === 'string' && value) {
+        const parsed = Date.parse(value);
+        date = Number.isNaN(parsed) ? new Date() : new Date(parsed);
+      } else {
+        date = new Date();
+      }
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
     }
 
     function getExpandedPanelPadding() {
@@ -708,8 +729,9 @@
     function updateUIWithPinpoint(name, lat, lon, firebaseStateText = 'Syncing…', firebaseStatusClass = '', opts = {}) {
       const formatted = formatCoords(lat, lon);
       const shortCoords = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+      const localTime = opts.localTime || formatLocalTime(opts.timestamp || new Date());
 
-      globe.setUserPinpointMarker(lat, lon, name);
+      globe.setUserPinpointMarker(lat, lon, name, localTime);
       globe.flyToLocation(lat, lon, {
         zoom: opts.zoom ?? 14.5,
         pitch: opts.pitch ?? 52,
@@ -729,6 +751,7 @@
       dom.userDisplayName.textContent = name;
       dom.userLatVal.textContent = lat.toFixed(6);
       dom.userLonVal.textContent = lon.toFixed(6);
+      dom.userTimeVal.textContent = localTime;
 
       dom.firebaseBadge.textContent = firebaseStateText;
       dom.firebaseBadge.className = `firebase-badge ${firebaseStatusClass}`.trim();
@@ -740,10 +763,11 @@
       return encodeURIComponent(name.trim().toLowerCase()).replace(/\./g, '%2E');
     }
 
-    async function saveToFirebase(name, latitude, longitude) {
+    async function saveToFirebase(name, latitude, longitude, localTime) {
       const cleanName = name.trim();
       const normalized = cleanName.toLowerCase();
       const personKey = toPersonKey(cleanName);
+      const now = new Date();
 
       try {
         const snapshot = await get(pinpointsRef);
@@ -764,8 +788,9 @@
           name: cleanName,
           latitude,
           longitude,
+          localTime: localTime || formatLocalTime(now),
           timestamp: serverTimestamp(),
-          createdAt: new Date().toISOString()
+          createdAt: now.toISOString()
         };
 
         await update(pinpointsRef, updates);
@@ -828,17 +853,27 @@
             nameSpan.className = 'recent-item-name';
             nameSpan.textContent = item.name || 'Anonymous';
 
+            const metaSpan = document.createElement('span');
+            metaSpan.className = 'recent-item-meta';
+
             const coordsSpan = document.createElement('span');
             coordsSpan.className = 'recent-item-coords';
             coordsSpan.textContent = `${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}`;
 
-            btn.append(nameSpan, coordsSpan);
+            const itemLocalTime = item.localTime || formatLocalTime(item.timestamp || item.createdAt);
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'recent-item-time';
+            timeSpan.textContent = itemLocalTime;
+
+            metaSpan.append(coordsSpan, timeSpan);
+            btn.append(nameSpan, metaSpan);
             btn.addEventListener('click', () => {
               const displayName = item.name || 'Anonymous';
               state.activeUser = {
                 name: displayName,
                 latitude: item.latitude,
-                longitude: item.longitude
+                longitude: item.longitude,
+                localTime: itemLocalTime
               };
               updateUIWithPinpoint(
                 displayName,
@@ -846,9 +881,9 @@
                 item.longitude,
                 'Saved to Firebase',
                 'is-saved',
-                { zoom: 16.6, pitch: 58, bearing: -18 }
+                { zoom: 16.6, pitch: 58, bearing: -18, localTime: itemLocalTime }
               );
-			  globe.setAltitudeTier("street");
+              globe.setAltitudeTier("street");
             });
 
             li.appendChild(btn);
@@ -914,10 +949,11 @@
         return;
       }
 
-      state.activeUser = { name: userName, ...coords };
+      const localTime = formatLocalTime(new Date());
+      state.activeUser = { name: userName, ...coords, localTime };
       dom.pinpointDialog.close('submit');
-      updateUIWithPinpoint(userName, coords.latitude, coords.longitude, 'Syncing…');
-      await saveToFirebase(userName, coords.latitude, coords.longitude);
+      updateUIWithPinpoint(userName, coords.latitude, coords.longitude, 'Syncing…', '', { localTime });
+      await saveToFirebase(userName, coords.latitude, coords.longitude, localTime);
     });
 
     dom.collapsePanelBtn.addEventListener('click', () => setPanelCollapsed(true, true));
